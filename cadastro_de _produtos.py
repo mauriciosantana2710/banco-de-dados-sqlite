@@ -2,14 +2,30 @@ import pyodbc
 #importação de módulos para construção da tela
 from tkinter import *
 from tkinter import ttk
-#valores = cursor.fetchall() #fetchall - Passa os dados do banco de dados para a variável
+
 def verifica_credencial():
 
 
     #print(pyodbc.drivers()) #visualização dos drivers disponíveis
     conexao = pyodbc.connect("Driver={SQLite3 ODBC Driver}; Server=localhost; Database=Projeto_Compras.db")
     cursor = conexao.cursor() #Ferramenta para executar comandos no SQL
-    #cursor.execute("Select * From Usuarios Where Nome = ? AND Senha = ?", (nome_usuario_entry.get(), senha_entry.get()))
+    cursor.execute("Select * From Usuarios Where Usuario = ? AND Senha = ?", (nome_usuario_entry.get(), senha_entry.get()))
+    #recebe query
+    usuario = cursor.fetchall() #fetchall - Passa os dados do banco de dados para a variável
+
+    if usuario:
+        print("Logged in")
+        janela_principal.destroy() #encerra o login
+        #janela nova para programa principal
+        janela = Tk()
+        janela.title("Janela Principal")
+
+
+    else:
+        message_lbl.config(text="Usuário ou senha incorretos")
+
+
+
 #login
 janela_principal = Tk()
 janela_principal.title("Login")
@@ -30,9 +46,10 @@ janela_principal.columnconfigure(0, weight=1)
 janela_principal.columnconfigure(1, weight=1)
 #linhas 0 e 9 vazias com weight=1 empurram o conteúdo para o centro vertical
 janela_principal.rowconfigure(0, weight=1)
-janela_principal.rowconfigure(9, weight=1)
+janela_principal.rowconfigure(10, weight=1)
 titulo_lbl.grid(row=1, column=0, columnspan=2, pady=20)
 #campos de entrada de dados
+
 senha_lbl = Label(janela_principal, text="Senha", font="Cambria 12", fg="Black", bg="#F0CE37")
 nome_usuario_lbl = Label(janela_principal, text="Usuário", font="Cambria 12", fg="Black", bg="#F0CE37")
 nome_usuario_lbl.grid(row=2, column=0, columnspan=2, pady=(10, 5))
@@ -63,6 +80,13 @@ mostrar_btn = Button(janela_principal, text="Mostrar senha",
                      cursor="hand2",
                      command=alternar_senha)
 mostrar_btn.grid(row=6, column=0, columnspan=2)
+
+#mensagem de erro de login (criada vazia, o texto é preenchido em verifica_credencial)
+message_lbl = Label(janela_principal, text="",
+                    font="Cambria 11",
+                    fg="#8B1A1A",
+                    bg="#F0CE37")
+message_lbl.grid(row=7, column=0, columnspan=2, pady=(5, 0))
 #Confirma e acessa
 entrar_btn = Button(janela_principal, text="Entrar",
                     font="Cambria 12 bold",
@@ -71,8 +95,9 @@ entrar_btn = Button(janela_principal, text="Entrar",
                     activeforeground="#F0CE37",
                     activebackground="#1d4a2a",
                     width=15,
-                    cursor="hand2")
-entrar_btn.grid(row=7, column=0, columnspan=2, pady=(10, 0))
+                    cursor="hand2",
+                    command=verifica_credencial)
+entrar_btn.grid(row=8, column=0, columnspan=2, pady=(10, 0))
 #sai do programa
 sair_btn = Button(janela_principal, text="Sair",
                   font="Cambria 12 bold",
@@ -83,7 +108,7 @@ sair_btn = Button(janela_principal, text="Sair",
                   width=15,
                   cursor="hand2",
                   command=janela_principal.destroy)
-sair_btn.grid(row=8, column=0, columnspan=2, pady=(8, 0))
+sair_btn.grid(row=9, column=0, columnspan=2, pady=(8, 0))
 
 
 
