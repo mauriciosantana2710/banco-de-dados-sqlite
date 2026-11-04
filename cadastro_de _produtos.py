@@ -18,7 +18,35 @@ def verifica_credencial():
         janela_principal.destroy() #encerra o login
         #janela nova para programa principal
         janela = Tk()
-        janela.title("Janela Principal")
+        janela.title("Cadastro de Produtos")
+        janela.configure(bg="#F5F5F5")
+        janela.attributes("-fullscreen", True)
+
+        Label(janela, text = "Nome do Produto", font = "Cambria 16", bg = "#F5F5F5").grid(row = 0, column = 2, padx = 10, pady = 10)
+
+        nome_produto = ttk.Combobox(janela, font = "Cambria 16")
+        nome_produto.grid(row = 0, column = 3, padx = 10, pady = 10, sticky= "NSEW")
+        #----------------------------------------------------------------------#
+        menu_barra = Menu(janela)
+        janela.config(menu = menu_barra)
+        menu_arquivo = Menu(menu_barra, tearoff = 0)
+        menu_barra.add_cascade(label = "Arquivo", menu = menu_arquivo)
+        #opção cadastrar
+        menu_arquivo.add_command(label= "Cadastrar", command = janela.destroy)
+        #opção sair
+        menu_arquivo.add_command(label = "Sair", command = janela.destroy)
+        #inicia janela
+        janela.mainloop()
+
+
+
+        #fecha conexao com o banco de dados
+        cursor.close()
+        conexao.close()
+
+
+
+
 
 
     else:
