@@ -23,9 +23,34 @@ def verifica_credencial():
         janela.attributes("-fullscreen", True)
 
         Label(janela, text = "Nome do Produto", font = "Cambria 16", bg = "#F5F5F5").grid(row = 0, column = 2, padx = 10, pady = 10)
-
         nome_produto = ttk.Combobox(janela, font = "Cambria 16")
         nome_produto.grid(row = 0, column = 3, padx = 10, pady = 10, sticky= "NSEW")
+        #----------------------------------------------------------------------------#
+
+        Label(janela, text = "Descrição do Produto ", font = "Cambria 16", bg = "#F5F5F5").grid(row = 0, column = 5, padx = 10, pady = 10)
+        descricao_produto = ttk.Combobox(janela, font = "Cambria 16")
+        descricao_produto.grid(row = 0, column = 6, padx = 10, pady = 10, sticky= "NSEW")
+
+        def cadastrar():
+            #nova janela em segundo plano
+            janela_cadastrar = Toplevel(janela)
+            janela_cadastrar.title("Cadastrar Produto")
+
+            largura, altura = 400, 200
+            pos_x = (janela_cadastrar.winfo_screenwidth() - largura) // 2
+            pos_y = (janela_cadastrar.winfo_screenheight() - altura) // 2
+            janela_cadastrar.geometry(f"{largura}x{altura}+{pos_x}+{pos_y}")
+            janela_cadastrar.config(bg="#F5F5F5")
+
+
+
+
+
+
+        botao_gravar = Button(janela, text="Novo", command= cadastrar, font="Cambria 26")
+        botao_gravar.grid(row=5, column=0, columnspan=4, sticky="NSEW", pady=5)
+
+
         #----------------------------------------------------------------------#
         menu_barra = Menu(janela)
         janela.config(menu = menu_barra)
