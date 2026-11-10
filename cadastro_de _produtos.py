@@ -27,7 +27,7 @@ def verifica_credencial():
             #armazenar pelo comando sql em valores(variável)
 
             valores = cursor.fetchall()
-
+            #exibição extraída do bd
             for linha in valores:
                 treeview.insert("", "end", values=(linha[0], linha[1], linha[2], linha[3]))
 
@@ -41,18 +41,38 @@ def verifica_credencial():
         Label(janela, text = "Nome do Produto", font = "Cambria 16", bg = "#F5F5F5").grid(row = 0, column = 2, padx = 10, pady = 10)
         nome_produto = ttk.Combobox(janela, font = "Cambria 16")
         nome_produto.grid(row = 0, column = 3, padx = 10, pady = 10, sticky= "NSEW")
+
+        #filtro em ordem crescente
+
+        cursor.execute("SELECT DISTINCT Nome FROM Produtos ORDER BY Nome ASC")
+
+        valores = cursor.fetchall()
+        #lista retornados
+        nomes_produtos = [valor[0] for valor in valores]
+
+        nome_produto['values'] = nomes_produtos #define a lista de valores da combobox
         #----------------------------------------------------------------------------#
 
         Label(janela, text = "Descrição do Produto ", font = "Cambria 16", bg = "#F5F5F5").grid(row = 0, column = 5, padx = 10, pady = 10)
         descricao_produto = ttk.Combobox(janela, font = "Cambria 16")
         descricao_produto.grid(row = 0, column = 6, padx = 10, pady = 10, sticky= "NSEW")
 
+        #filtro em ordem crescente
+        
+        cursor.execute("SELECT DISTINCT Descricao FROM Produtos ORDER BY Descricao ASC")
+        
+        valoresDescricao = cursor.fetchall()
+        #lista retornados
+        descricao_produtos = [valor[0] for valor in valoresDescricao]
+        
+        descricao_produto['values'] = descricao_produtos #define a lista de valores da combobox
+
         def cadastrar():
             #nova janela em segundo plano
             janela_cadastrar = Toplevel(janela)
             janela_cadastrar.title("Cadastrar Produto")
 
-            largura, altura = 400, 200
+            largura, altura = 500, 200
             pos_x = (janela_cadastrar.winfo_screenwidth() - largura) // 2
             pos_y = (janela_cadastrar.winfo_screenheight() - altura) // 2
             janela_cadastrar.geometry(f"{largura}x{altura}+{pos_x}+{pos_y}")
@@ -83,7 +103,7 @@ def verifica_credencial():
                 #salvar
                 conexao.commit()
                 #listagem e atualização na treeview
-                listar_dados()
+                lista_dados()
                 #fechar
                 janela_cadastrar.destroy()
 
@@ -92,6 +112,14 @@ def verifica_credencial():
 
             botao_cancelar = Button(janela_cadastrar, text="Cancelar", command= janela_cadastrar.destroy, font="Cambria 20")
             botao_cancelar.grid(row=5, column=0, columnspan=2, sticky="NSEW", pady=5, padx=5)
+
+            for i in range(5):
+                janela_cadastrar.grid_rowconfigure(i, weight=1)
+
+            for i in range(2):
+                janela_cadastrar.grid_columnconfigure(i, weight=1)
+
+
 
 
 
@@ -120,7 +148,11 @@ def verifica_credencial():
         for col in colunas:
             treeview.heading(col, text= col)
 
+
+        #treeview na tela
         treeview.grid(row=4, column=0, columnspan=10, padx=5, pady=5, sticky="NSEW")
+        #largura 0
+        treeview.column("#0", width=0, stretch=False)
 
 
 
@@ -240,6 +272,15 @@ sair_btn = Button(janela_principal, text="Sair",
                   command=janela_principal.destroy)
 sair_btn.grid(row=9, column=0, columnspan=2, pady=(8, 0))
 
+for i in range(5):
+    janela_principal.grid_rowconfigure(i, weight=1)
+
+for i in range(2):
+    janela_principal.grid_rowconfigure(i, weight=1)
+
+
+entrar_btn.config(width=10)
+sair_btn.config(width=10)
 
 
 
