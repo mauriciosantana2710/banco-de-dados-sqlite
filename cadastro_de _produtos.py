@@ -20,7 +20,7 @@ def verifica_credencial():
         janela = Tk()
         janela.title("Cadastro de Produtos")
         janela.configure(bg="#F5F5F5")
-        janela.attributes("-fullscreen", True)
+        #janela.attributes("-fullscreen", True)
 
         Label(janela, text = "Nome do Produto", font = "Cambria 16", bg = "#F5F5F5").grid(row = 0, column = 2, padx = 10, pady = 10)
         nome_produto = ttk.Combobox(janela, font = "Cambria 16")
@@ -41,6 +41,39 @@ def verifica_credencial():
             pos_y = (janela_cadastrar.winfo_screenheight() - altura) // 2
             janela_cadastrar.geometry(f"{largura}x{altura}+{pos_x}+{pos_y}")
             janela_cadastrar.config(bg="#F5F5F5")
+
+            #nome do produto 
+#-----------------------------------------------------------------------------------------
+            Label(janela_cadastrar, text="Nome do Produto", font="Cambria 14", bg="#FFFFFF").grid(row=0, column=0, padx=10, pady=10, sticky="W")
+            nome_produto_cadastrar = Entry(janela_cadastrar, font="Cambria 14")
+            nome_produto_cadastrar.grid(row=0, column=1, padx=10, pady=10)
+#-----------------------------------------------------------------------------------------------------------------------------
+            #descrição do produto
+            Label(janela_cadastrar, text="Descrição", font="Cambria 14", bg="#FFFFFF").grid(row=1, column=0, padx=10, pady=10, sticky="W")
+            descricao_produto_cadastrar = Entry(janela_cadastrar, font="Cambria 14")
+            descricao_produto_cadastrar.grid(row=1, column=1, padx=10, pady=10)
+#------------------------------------------------------------------------------------------------------------------------------
+            #preço do produto
+            Label(janela_cadastrar, text="Preço", font="Cambria 14", bg="#FFFFFF").grid(row=2, column=0, padx=10, pady=10, sticky="W")
+            preco_produto_cadastrar = Entry(janela_cadastrar, font="Cambria 14")
+            preco_produto_cadastrar.grid(row=2, column=1, padx=10, pady=10)
+
+            def salvar_dados():
+
+                #tupla valores
+                novo_produto_cadastrar = (nome_produto_cadastrar.get(), descricao_produto_cadastrar.get(), preco_produto_cadastrar.get());
+                #inserção dos valores
+                cursor.execute("INSERT INTO Produtos (Nome, Descricao, Preco) VALUES (?, ?, ?)", novo_produto_cadastrar)
+                #salvar
+                conexao.commit()
+                #fechar
+                janela_cadastrar.destroy()
+
+            botao_salvar_dados = Button(janela_cadastrar, text="Salvar", command= salvar_dados, font="Cambria 20")
+            botao_salvar_dados.grid(row=4, column=0, columnspan=2, sticky="NSEW", pady=5, padx=5)
+
+            botao_cancelar = Button(janela_cadastrar, text="Cancelar", command= janela_cadastrar.destroy, font="Cambria 20")
+            botao_cancelar.grid(row=5, column=0, columnspan=2, sticky="NSEW", pady=5, padx=5)
 
 
 
