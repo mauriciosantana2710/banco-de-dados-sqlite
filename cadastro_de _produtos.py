@@ -16,6 +16,22 @@ def verifica_credencial():
     if usuario:
         print("Logged in")
         janela_principal.destroy() #encerra o login
+
+        def lista_dados():
+            #limpar valores
+            for i in treeview.get_children():
+                treeview.delete(i)
+
+            #executa valores retornados pelo comando SQL na variável
+            cursor.execute("SELECT * From Produtos")
+            #armazenar pelo comando sql em valores(variável)
+
+            valores = cursor.fetchall()
+
+            for linha in valores:
+                treeview.insert("", "end", values=(linha[0], linha[1], linha[2], linha[3]))
+
+
         #janela nova para programa principal
         janela = Tk()
         janela.title("Cadastro de Produtos")
@@ -66,6 +82,8 @@ def verifica_credencial():
                 cursor.execute("INSERT INTO Produtos (Nome, Descricao, Preco) VALUES (?, ?, ?)", novo_produto_cadastrar)
                 #salvar
                 conexao.commit()
+                #listagem e atualização na treeview
+                listar_dados()
                 #fechar
                 janela_cadastrar.destroy()
 
@@ -82,6 +100,32 @@ def verifica_credencial():
 
         botao_gravar = Button(janela, text="Novo", command= cadastrar, font="Cambria 26")
         botao_gravar.grid(row=5, column=0, columnspan=4, sticky="NSEW", pady=5)
+        #-------------------------------------------------------------------------#
+        #Estilo Treeview
+        style = ttk.Style(janela)
+        treeview = ttk.Treeview(janela, style="mystyle.Treeview")
+        style.theme_use("default")
+        style.configure("mystyle.Treeview", font="Cambria 12")
+
+        #colunas treeview
+
+        colunas = ["ID", "Nome", "Descrição", "Preço"]
+        treeview["columns"] = colunas
+
+        #listar valores do bd na treeview
+        lista_dados()
+
+        #Heading/cabeçalho
+
+        for col in colunas:
+            treeview.heading(col, text= col)
+
+        treeview.grid(row=4, column=0, columnspan=10, padx=5, pady=5, sticky="NSEW")
+
+
+
+        
+
 
 
         #----------------------------------------------------------------------#
