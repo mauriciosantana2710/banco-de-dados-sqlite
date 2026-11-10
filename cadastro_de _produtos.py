@@ -154,6 +154,23 @@ def verifica_credencial():
         #largura 0
         treeview.column("#0", width=0, stretch=False)
 
+        def filtrar_dados(nome_produto, descricao_produto):
+
+            print("")
+
+        #filtro letra a letra
+        nome_produto.bind('<KeyRelease>', lambda e: filtrar_dados(nome_produto, descricao_produto))
+
+        descricao_produto.bind('<KeyRelease>', lambda e: filtrar_dados(nome_produto, descricao_produto))
+
+        #-----------------------------------------------------------------------------------------------------
+        #filtro ao selecionar o item
+        nome_produto.bind('<ComboboxSelected>', lambda e: filtrar_dados(nome_produto, descricao_produto))
+
+        descricao_produto.bind('<ComboboxSelected>', lambda e: filtrar_dados(nome_produto, descricao_produto))
+
+
+
 
 
         
