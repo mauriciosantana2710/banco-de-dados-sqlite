@@ -161,6 +161,73 @@ def verifica_credencial():
 
                 treeview.delete(i)
 
+        #--------------------------------------------------------------------------#
+        #Edição
+        def editar_dados():
+                #nova janela em segundo plano
+                janela_edicao = Toplevel(janela)
+                janela_edicao.title("Editar Produto")
+
+                largura, altura = 500, 200
+                pos_x = (janela_edicao.winfo_screenwidth() - largura) // 2
+                pos_y = (janela_edicao.winfo_screenheight() - altura) // 2
+                janela_edicao.geometry(f"{largura}x{altura}+{pos_x}+{pos_y}")
+                janela_edicao.config(bg="#F5F5F5")
+
+                #nome do produto 
+    #-----------------------------------------------------------------------------------------
+                Label(janela_edicao, text="Nome do Produto", font="Cambria 14", bg="#FFFFFF").grid(row=0, column=0, padx=10, pady=10, sticky="W")
+                nome_produto_cadastrar = Entry(janela_edicao, font="Cambria 14")
+                nome_produto_cadastrar.grid(row=0, column=1, padx=10, pady=10)
+    #-----------------------------------------------------------------------------------------------------------------------------
+                #descrição do produto
+                Label(janela_edicao, text="Descrição", font="Cambria 14", bg="#FFFFFF").grid(row=1, column=0, padx=10, pady=10, sticky="W")
+                descricao_produto_cadastrar = Entry(janela_edicao, font="Cambria 14")
+                descricao_produto_cadastrar.grid(row=1, column=1, padx=10, pady=10)
+    #------------------------------------------------------------------------------------------------------------------------------
+                #preço do produto
+                Label(janela_edicao, text="Preço", font="Cambria 14", bg="#FFFFFF").grid(row=2, column=0, padx=10, pady=10, sticky="W")
+                preco_produto_cadastrar = Entry(janela_edicao, font="Cambria 14")
+                preco_produto_cadastrar.grid(row=2, column=1, padx=10, pady=10)
+        def salvar_dados():
+
+            #tupla valores
+            novo_produto_cadastrar = (nome_produto_cadastrar.get(), descricao_produto_cadastrar.get(), preco_produto_cadastrar.get());
+            #inserção dos valores
+            cursor.execute("INSERT INTO Produtos (Nome, Descricao, Preco) VALUES (?, ?, ?)", novo_produto_cadastrar)
+            #salvar
+            conexao.commit()
+            #listagem e atualização na treeview
+            lista_dados()
+            #fechar
+            janela_edicao.destroy()
+
+        botao_salvar_dados = Button(janela_edicao, text="Salvar", command= salvar_dados, font="Cambria 20")
+        botao_salvar_dados.grid(row=4, column=0, columnspan=2, sticky="NSEW", pady=5, padx=5)
+    
+        botao_cancelar = Button(janela_edicao, text="Cancelar", command= janela_edicao.destroy, font="Cambria 20")
+        botao_cancelar.grid(row=5, column=0, columnspan=2, sticky="NSEW", pady=5, padx=5)
+    
+        for i in range(5):
+            janela_edicao.grid_rowconfigure(i, weight=1)
+    
+        for i in range(2):
+            janela_edicao.grid_columnconfigure(i, weight=1)
+    
+    
+    
+    
+    
+    
+    
+    
+            botao_gravar = Button(janela, text="Novo", command= cadastrar, font="Cambria 26")
+            botao_gravar.grid(row=5, column=0, columnspan=4, sticky="NSEW", pady=5)
+
+
+
+        treeview.bind("<Double-1>, editar_dados")#duplo clique p editar
+
 
         def filtrar_dados(nome_produto, descricao_produto):
             #verifica se combobox == vazio
