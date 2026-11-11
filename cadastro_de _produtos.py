@@ -229,6 +229,11 @@ def verifica_credencial():
                 conexao.commit()
 
                 janela_edicao.destroy()
+                #atualiza
+                lista_dados()
+
+
+
 
 
 
@@ -306,7 +311,21 @@ def verifica_credencial():
 
         descricao_produto.bind('<<ComboboxSelected>>', lambda e: filtrar_dados(nome_produto, descricao_produto))
 
+        def deletar():
 
+            #id do registro
+            selected_item = treeview.selection()[0]
+            id_selecionado = treeview.item(selected_item)['values'][0]
+            #comando para deletar
+            cursor.execute("DELETE FROM Produtos WHERE ID = ?", (id_selecionado,))
+            conexao.commit()
+            #atualiza
+            lista_dados()
+
+
+
+        botao_deletar = Button(janela, text="Deletar", command= deletar, font="Cambria 26")
+        botao_deletar.grid(row=5, column=4, columnspan=4, sticky="NSEW", pady=5)
 
 
 
