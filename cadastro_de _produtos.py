@@ -6,7 +6,6 @@ from tkinter import ttk
 #----------------------------------------------------------------------------#
 # PALETA DE CORES DA APLICAÇÃO
 #----------------------------------------------------------------------------#
-# Login: amarelo claro
 COR_LOGIN_FUNDO = "#FFF1B8"
 COR_LOGIN_SAIR = "#F2D675"
 COR_LOGIN_SAIR_HOVER = "#E8C95A"
