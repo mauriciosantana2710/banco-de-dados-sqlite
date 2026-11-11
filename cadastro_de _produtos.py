@@ -163,70 +163,73 @@ def verifica_credencial():
 
         #--------------------------------------------------------------------------#
         #Edição
-        def editar_dados():
-                #nova janela em segundo plano
-                janela_edicao = Toplevel(janela)
-                janela_edicao.title("Editar Produto")
+        def editar_dados(event=None):
 
-                largura, altura = 500, 200
-                pos_x = (janela_edicao.winfo_screenwidth() - largura) // 2
-                pos_y = (janela_edicao.winfo_screenheight() - altura) // 2
-                janela_edicao.geometry(f"{largura}x{altura}+{pos_x}+{pos_y}")
-                janela_edicao.config(bg="#F5F5F5")
+            #obtem o item selecionado; sai se nada estiver selecionado
+            selecao = treeview.selection()
+            if not selecao:
+                return
+            item_selecionado = selecao[0]
+            #obtem os valores da linha selecionada
+            valores_selecionados = treeview.item(item_selecionado)['values']
+            #nova janela em segundo plano
+            janela_edicao = Toplevel(janela)
+            janela_edicao.title("Editar Produto")
 
-                #nome do produto 
-    #-----------------------------------------------------------------------------------------
-                Label(janela_edicao, text="Nome do Produto", font="Cambria 14", bg="#FFFFFF").grid(row=0, column=0, padx=10, pady=10, sticky="W")
-                nome_produto_cadastrar = Entry(janela_edicao, font="Cambria 14")
-                nome_produto_cadastrar.grid(row=0, column=1, padx=10, pady=10)
-    #-----------------------------------------------------------------------------------------------------------------------------
-                #descrição do produto
-                Label(janela_edicao, text="Descrição", font="Cambria 14", bg="#FFFFFF").grid(row=1, column=0, padx=10, pady=10, sticky="W")
-                descricao_produto_cadastrar = Entry(janela_edicao, font="Cambria 14")
-                descricao_produto_cadastrar.grid(row=1, column=1, padx=10, pady=10)
-    #------------------------------------------------------------------------------------------------------------------------------
-                #preço do produto
-                Label(janela_edicao, text="Preço", font="Cambria 14", bg="#FFFFFF").grid(row=2, column=0, padx=10, pady=10, sticky="W")
-                preco_produto_cadastrar = Entry(janela_edicao, font="Cambria 14")
-                preco_produto_cadastrar.grid(row=2, column=1, padx=10, pady=10)
-        def salvar_dados():
+            largura, altura = 500, 200
+            pos_x = (janela_edicao.winfo_screenwidth() - largura) // 2
+            pos_y = (janela_edicao.winfo_screenheight() - altura) // 2
+            janela_edicao.geometry(f"{largura}x{altura}+{pos_x}+{pos_y}")
+            janela_edicao.config(bg="#F5F5F5")
 
-            #tupla valores
-            novo_produto_cadastrar = (nome_produto_cadastrar.get(), descricao_produto_cadastrar.get(), preco_produto_cadastrar.get());
-            #inserção dos valores
-            cursor.execute("INSERT INTO Produtos (Nome, Descricao, Preco) VALUES (?, ?, ?)", novo_produto_cadastrar)
-            #salvar
-            conexao.commit()
-            #listagem e atualização na treeview
-            lista_dados()
-            #fechar
-            janela_edicao.destroy()
+            #nome do produto
+            Label(janela_edicao, text="Nome do Produto", font="Cambria 14", bg="#FFFFFF").grid(row=0, column=0, padx=10, pady=10, sticky="W")
+            nome_produto_edicao = Entry(janela_edicao, font="Cambria 14")
+            nome_produto_edicao.grid(row=0, column=1, padx=10, pady=10)
+            #descrição do produto
+            Label(janela_edicao, text="Descrição", font="Cambria 14", bg="#FFFFFF").grid(row=1, column=0, padx=10, pady=10, sticky="W")
+            descricao_produto_edicao = Entry(janela_edicao, font="Cambria 14")
+            descricao_produto_edicao.grid(row=1, column=1, padx=10, pady=10)
+            #preço do produto
+            Label(janela_edicao, text="Preço", font="Cambria 14", bg="#FFFFFF").grid(row=2, column=0, padx=10, pady=10, sticky="W")
+            preco_produto_edicao = Entry(janela_edicao, font="Cambria 14")
+            preco_produto_edicao.grid(row=2, column=1, padx=10, pady=10)
 
-        botao_salvar_dados = Button(janela_edicao, text="Salvar", command= salvar_dados, font="Cambria 20")
-        botao_salvar_dados.grid(row=4, column=0, columnspan=2, sticky="NSEW", pady=5, padx=5)
-    
-        botao_cancelar = Button(janela_edicao, text="Cancelar", command= janela_edicao.destroy, font="Cambria 20")
-        botao_cancelar.grid(row=5, column=0, columnspan=2, sticky="NSEW", pady=5, padx=5)
-    
-        for i in range(5):
-            janela_edicao.grid_rowconfigure(i, weight=1)
-    
-        for i in range(2):
-            janela_edicao.grid_columnconfigure(i, weight=1)
-    
-    
-    
-    
-    
-    
-    
-    
-            botao_gravar = Button(janela, text="Novo", command= cadastrar, font="Cambria 26")
-            botao_gravar.grid(row=5, column=0, columnspan=4, sticky="NSEW", pady=5)
+            #preenche os campos com os dados atuais (colunas: ID, Nome, Descrição, Preço)
+            nome_produto_edicao.insert(0, valores_selecionados[1])
+            descricao_produto_edicao.insert(0, valores_selecionados[2])
+            preco_produto_edicao.insert(0, valores_selecionados[3])
 
+            def salvar_edicao():
 
+                novo_nome = nome_produto_edicao.get()
+                nova_descricao = descricao_produto_edicao.get()
+                novo_preco = preco_produto_edicao.get()
 
-        treeview.bind("<Double-1>, editar_dados")#duplo clique p editar
+                #alteração dos dados
+                cursor.execute("UPDATE Produtos SET Nome = ?, Descricao = ?, Preco = ? WHERE ID = ?",
+                               (novo_nome, nova_descricao, novo_preco, valores_selecionados[0]))
+                #salvar
+                conexao.commit()
+                #listagem e atualização na treeview
+                lista_dados()
+                #fechar
+                janela_edicao.destroy()
+
+            botao_salvar_edicao = Button(janela_edicao, text="Salvar", command=salvar_edicao, font="Cambria 20")
+            botao_salvar_edicao.grid(row=4, column=0, columnspan=2, sticky="NSEW", pady=5, padx=5)
+
+            botao_cancelar_edicao = Button(janela_edicao, text="Cancelar", command=janela_edicao.destroy, font="Cambria 20")
+            botao_cancelar_edicao.grid(row=5, column=0, columnspan=2, sticky="NSEW", pady=5, padx=5)
+
+            for i in range(6):
+                janela_edicao.grid_rowconfigure(i, weight=1)
+
+            for i in range(2):
+                janela_edicao.grid_columnconfigure(i, weight=1)
+
+        #duplo clique para editar
+        treeview.bind("<Double-1>", editar_dados)
 
 
         def filtrar_dados(nome_produto, descricao_produto):
