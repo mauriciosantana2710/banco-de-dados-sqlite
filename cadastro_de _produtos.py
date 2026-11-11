@@ -154,9 +154,57 @@ def verifica_credencial():
         #largura 0
         treeview.column("#0", width=0, stretch=False)
 
-        def filtrar_dados(nome_produto, descricao_produto):
+        #limpar da treeview
+        def limpa_dados():
 
-            print("")
+            for i in treeview.get_children():
+
+                treeview.delete(i)
+
+
+        def filtrar_dados(nome_produto, descricao_produto):
+            #verifica se combobox == vazio
+            if nome_produto.get() == "" and descricao_produto.get() =="":
+
+                lista_dados()
+            #sair
+                return
+            #consulta dinâmica sql
+            sql = "SELECT * FROM Produtos"
+
+            parametros = []
+
+            if nome_produto.get():
+                sql += " WHERE Nome LIKE ?"
+
+                parametros.append('%' + nome_produto.get() + '%')
+
+            if descricao_produto.get():
+
+                if nome_produto.get():
+
+                    sql += " AND"
+
+                else:
+
+                    sql += " WHERE"
+
+                sql+= " Descricao LIKE ?"
+
+                parametros.append('%' + descricao_produto.get() + '%')
+
+            cursor.execute(sql, tuple(parametros))
+
+            produtos = cursor.fetchall()
+
+            limpa_dados()
+
+            for dado in produtos:
+
+                treeview.insert("", "end", values=(dado[0],dado[1], dado[2], dado[3]))
+
+
+            
 
         #filtro letra a letra
         nome_produto.bind('<KeyRelease>', lambda e: filtrar_dados(nome_produto, descricao_produto))
@@ -165,9 +213,9 @@ def verifica_credencial():
 
         #-----------------------------------------------------------------------------------------------------
         #filtro ao selecionar o item
-        nome_produto.bind('<ComboboxSelected>', lambda e: filtrar_dados(nome_produto, descricao_produto))
+        nome_produto.bind('<<ComboboxSelected>>', lambda e: filtrar_dados(nome_produto, descricao_produto))
 
-        descricao_produto.bind('<ComboboxSelected>', lambda e: filtrar_dados(nome_produto, descricao_produto))
+        descricao_produto.bind('<<ComboboxSelected>>', lambda e: filtrar_dados(nome_produto, descricao_produto))
 
 
 
