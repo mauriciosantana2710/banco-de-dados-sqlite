@@ -216,11 +216,30 @@ def verifica_credencial():
                 #fechar
                 janela_edicao.destroy()
 
-            botao_salvar_edicao = Button(janela_edicao, text="Salvar", command=salvar_edicao, font="Cambria 20")
-            botao_salvar_edicao.grid(row=4, column=0, columnspan=2, sticky="NSEW", pady=5, padx=5)
+            botao_salvar_edicao = Button(janela_edicao, text="Editar", command=salvar_edicao, font="Cambria 16", background="#008000", foreground="#FFFFFF")
+            botao_salvar_edicao.grid(row=4, column=0, sticky="NSEW", pady=5, padx=5)
+            def deletar_registro():
+                #id do registro
+                selected_item = treeview.selection()[0]
+
+                id_selecionado = treeview.item(selected_item)['values'][0]
+                #comando para deletar
+                cursor.execute("DELETE FROM Produtos WHERE ID = ?", (id_selecionado,))
+
+                conexao.commit()
+
+                janela_edicao.destroy()
+
+
+
+
+
+            #deletar
+            botao_deletar_registro = Button(janela_edicao, text="Deletar", command=deletar_registro, font="Cambria 16", background="#FF0000", foreground="#FFFFFF")
+            botao_deletar_registro.grid(row=4, column=1, sticky="NSEW", pady=5, padx=5)
 
             botao_cancelar_edicao = Button(janela_edicao, text="Cancelar", command=janela_edicao.destroy, font="Cambria 20")
-            botao_cancelar_edicao.grid(row=5, column=0, columnspan=2, sticky="NSEW", pady=5, padx=5)
+            botao_cancelar_edicao.grid(row=5, column=0, pady=20, padx=20)
 
             for i in range(6):
                 janela_edicao.grid_rowconfigure(i, weight=1)
