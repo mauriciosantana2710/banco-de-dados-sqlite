@@ -60,10 +60,14 @@ def verifica_credencial():
         print("Logged in")
         janela_principal.destroy() #encerra o login
 
-        def lista_dados():
-            #limpar valores
+        #limpar da treeview
+        def limpa_dados():
             for i in treeview.get_children():
                 treeview.delete(i)
+
+        def lista_dados():
+            #limpar valores
+            limpa_dados()
 
             #executa valores retornados pelo comando SQL na variável
             cursor.execute("SELECT * From Produtos")
@@ -87,40 +91,14 @@ def verifica_credencial():
         janela.grid_columnconfigure(0, weight=1)
         janela.grid_rowconfigure(1, weight=1)
 
-        #barra de filtros (linha 0)
+        #barra de pesquisa (linha 0)
         frame_filtros = Frame(janela, bg=COR_FUNDO)
         frame_filtros.grid(row=0, column=0, sticky="EW", padx=15, pady=(15, 5))
         frame_filtros.grid_columnconfigure(1, weight=1)
-        frame_filtros.grid_columnconfigure(3, weight=1)
 
-        Label(frame_filtros, text = "Nome do Produto", font = "Cambria 12", bg = COR_FUNDO, fg = COR_TEXTO).grid(row = 0, column = 0, padx = (0, 8))
-        nome_produto = ttk.Combobox(frame_filtros, font = "Cambria 12")
-        nome_produto.grid(row = 0, column = 1, padx = (0, 20), sticky= "EW")
-
-        #filtro em ordem crescente
-
-        cursor.execute("SELECT DISTINCT Nome FROM Produtos ORDER BY Nome ASC")
-
-        valores = cursor.fetchall()
-        #lista retornados
-        nomes_produtos = [valor[0] for valor in valores]
-
-        nome_produto['values'] = nomes_produtos #define a lista de valores da combobox
-        #----------------------------------------------------------------------------#
-
-        Label(frame_filtros, text = "Descrição do Produto", font = "Cambria 12", bg = COR_FUNDO, fg = COR_TEXTO).grid(row = 0, column = 2, padx = (0, 8))
-        descricao_produto = ttk.Combobox(frame_filtros, font = "Cambria 12")
-        descricao_produto.grid(row = 0, column = 3, sticky= "EW")
-
-        #filtro em ordem crescente
-        
-        cursor.execute("SELECT DISTINCT Descricao FROM Produtos ORDER BY Descricao ASC")
-        
-        valoresDescricao = cursor.fetchall()
-        #lista retornados
-        descricao_produtos = [valor[0] for valor in valoresDescricao]
-        
-        descricao_produto['values'] = descricao_produtos #define a lista de valores da combobox
+        Label(frame_filtros, text="Pesquisar por nome", font="Cambria 12", bg=COR_FUNDO, fg=COR_TEXTO).grid(row=0, column=0, padx=(0, 8))
+        pesquisa_nome = Entry(frame_filtros, font="Cambria 12", relief="solid", bd=1)
+        pesquisa_nome.grid(row=0, column=1, sticky="EW", ipady=3)
 
         def cadastrar():
             #nova janela em segundo plano
@@ -153,13 +131,13 @@ def verifica_credencial():
             def salvar_dados():
 
                 #tupla valores
-                novo_produto_cadastrar = (nome_produto_cadastrar.get(), descricao_produto_cadastrar.get(), preco_produto_cadastrar.get());
+                novo_produto_cadastrar = (nome_produto_cadastrar.get(), descricao_produto_cadastrar.get(), preco_produto_cadastrar.get())
                 #inserção dos valores
                 cursor.execute("INSERT INTO Produtos (Nome, Descricao, Preco) VALUES (?, ?, ?)", novo_produto_cadastrar)
                 #salvar
                 conexao.commit()
                 #listagem e atualização na treeview
-                lista_dados()
+                filtrar_dados()
                 #fechar
                 janela_cadastrar.destroy()
 
@@ -220,13 +198,6 @@ def verifica_credencial():
         #treeview na tela
         treeview.grid(row=0, column=0, sticky="NSEW")
 
-        #limpar da treeview
-        def limpa_dados():
-
-            for i in treeview.get_children():
-
-                treeview.delete(i)
-
         #--------------------------------------------------------------------------#
         #Edição
         def editar_dados(event=None):
@@ -282,7 +253,7 @@ def verifica_credencial():
                 #salvar
                 conexao.commit()
                 #listagem e atualização na treeview
-                lista_dados()
+                filtrar_dados()
                 #fechar
                 janela_edicao.destroy()
 
@@ -298,7 +269,7 @@ def verifica_credencial():
 
                 janela_edicao.destroy()
                 #atualiza
-                lista_dados()
+                filtrar_dados()
             #três botões na mesma linha: Deletar à esquerda (isolado por ser destrutivo), Cancelar e Editar à direita
             frame_botoes_edicao = Frame(janela_edicao, bg=COR_FUNDO)
             frame_botoes_edicao.grid(row=3, column=0, columnspan=2, sticky="EW", padx=20, pady=(15, 20))
@@ -312,61 +283,27 @@ def verifica_credencial():
         treeview.bind("<Double-1>", editar_dados)
 
 
-        def filtrar_dados(nome_produto, descricao_produto):
-            #verifica se combobox == vazio
-            if nome_produto.get() == "" and descricao_produto.get() =="":
+        def filtrar_dados(event=None):
+            #texto digitado na caixa de pesquisa (sem espaços nas pontas)
+            texto = pesquisa_nome.get().strip()
 
+            #caixa vazia: mostra todos os produtos
+            if texto == "":
                 lista_dados()
-            #sair
                 return
-            #consulta dinâmica sql
-            sql = "SELECT * FROM Produtos"
 
-            parametros = []
-
-            if nome_produto.get():
-                sql += " WHERE Nome LIKE ?"
-
-                parametros.append('%' + nome_produto.get() + '%')
-
-            if descricao_produto.get():
-
-                if nome_produto.get():
-
-                    sql += " AND"
-
-                else:
-
-                    sql += " WHERE"
-
-                sql+= " Descricao LIKE ?"
-
-                parametros.append('%' + descricao_produto.get() + '%')
-
-            cursor.execute(sql, tuple(parametros))
-
+            #busca pelo nome, em qualquer parte do texto, sem diferenciar maiúsculas/minúsculas
+            cursor.execute("SELECT * FROM Produtos WHERE Nome LIKE ?", ('%' + texto + '%',))
             produtos = cursor.fetchall()
 
             limpa_dados()
 
             for posicao, dado in enumerate(produtos):
-
-                treeview.insert("", "end", values=(dado[0],dado[1], dado[2], dado[3]),
+                treeview.insert("", "end", values=(dado[0], dado[1], dado[2], dado[3]),
                                 tags=("par" if posicao % 2 == 0 else "impar",))
 
-
-            
-
-        #filtro letra a letra
-        nome_produto.bind('<KeyRelease>', lambda e: filtrar_dados(nome_produto, descricao_produto))
-
-        descricao_produto.bind('<KeyRelease>', lambda e: filtrar_dados(nome_produto, descricao_produto))
-
-        #-----------------------------------------------------------------------------------------------------
-        #filtro ao selecionar o item
-        nome_produto.bind('<<ComboboxSelected>>', lambda e: filtrar_dados(nome_produto, descricao_produto))
-
-        descricao_produto.bind('<<ComboboxSelected>>', lambda e: filtrar_dados(nome_produto, descricao_produto))
+        #pesquisa letra a letra
+        pesquisa_nome.bind('<KeyRelease>', filtrar_dados)
 
         def deletar():
 
@@ -377,8 +314,7 @@ def verifica_credencial():
             cursor.execute("DELETE FROM Produtos WHERE ID = ?", (id_selecionado,))
             conexao.commit()
             #atualiza
-            lista_dados()
-
+            filtrar_dados()
 
 
         #barra de botões (linha 2), alinhada à direita abaixo da tabela
@@ -387,11 +323,6 @@ def verifica_credencial():
 
         criar_botao(frame_botoes, "Novo", cadastrar, "principal", largura=12).grid(row=0, column=0, padx=(0, 10))
         criar_botao(frame_botoes, "Deletar", deletar, "perigo", largura=12).grid(row=0, column=1)
-
-
-
-        
-
 
 
         #----------------------------------------------------------------------#
@@ -407,19 +338,13 @@ def verifica_credencial():
         janela.mainloop()
 
 
-
         #fecha conexao com o banco de dados
         cursor.close()
         conexao.close()
 
 
-
-
-
-
     else:
         message_lbl.config(text="Usuário ou senha incorretos")
-
 
 
 #login
@@ -494,6 +419,10 @@ entrar_btn = Button(janela_principal, text="Entrar",
                     cursor="hand2",
                     command=verifica_credencial)
 entrar_btn.grid(row=8, column=0, columnspan=2, pady=(10, 0))
+
+#pressionar Enter nos campos de usuário/senha executa o login
+senha_entry.bind("<Return>", lambda evento: verifica_credencial())
+nome_usuario_entry.bind("<Return>", lambda evento: verifica_credencial())
 #sai do programa
 sair_btn = Button(janela_principal, text="Sair",
                   font="Cambria 12 bold",
@@ -515,7 +444,6 @@ for i in range(2):
 
 entrar_btn.config(width=10)
 sair_btn.config(width=10)
-
 
 
 janela_principal.mainloop() #inicia a janela na tela
