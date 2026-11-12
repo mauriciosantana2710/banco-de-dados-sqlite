@@ -2,6 +2,7 @@ import pyodbc
 #importação de módulos para construção da tela
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
 
 #----------------------------------------------------------------------------#
 # PALETA DE CORES DA APLICAÇÃO
@@ -201,13 +202,26 @@ def verifica_credencial():
         #Edição
         def editar_dados(event=None):
 
-            #obtem o item selecionado; sai se nada estiver selecionado
-            selecao = treeview.selection()
-            if not selecao:
+            if event is not None:
+                #duplo clique: usa a linha que está sob o mouse (ignora cabeçalho e área vazia)
+                item_selecionado = treeview.identify_row(event.y)
+                if not item_selecionado:
+                    return
+                treeview.selection_set(item_selecionado)
+            else:
+                selecao = treeview.selection()
+                if not selecao:
+                    return
+                item_selecionado = selecao[0]
+
+            #guarda o ID do produto aberto: é ele que o Editar/Deletar usam, mesmo que a seleção mude
+            id_produto = treeview.item(item_selecionado)['values'][0]
+
+            #lê os dados direto do banco (a treeview converte "007" em 7, "5.50" em 5.5)
+            cursor.execute("SELECT Nome, Descricao, Preco FROM Produtos WHERE ID = ?", (id_produto,))
+            produto = cursor.fetchone()
+            if produto is None:
                 return
-            item_selecionado = selecao[0]
-            #obtem os valores da linha selecionada
-            valores_selecionados = treeview.item(item_selecionado)['values']
             #nova janela em segundo plano
             janela_edicao = Toplevel(janela)
             janela_edicao.title("Editar Produto")
@@ -235,10 +249,10 @@ def verifica_credencial():
             preco_produto_edicao = Entry(janela_edicao, font="Cambria 12", relief="solid", bd=1)
             preco_produto_edicao.grid(row=2, column=1, padx=(5, 20), pady=8, sticky="EW", ipady=3)
 
-            #preenche os campos com os dados atuais (colunas: ID, Nome, Descrição, Preço)
-            nome_produto_edicao.insert(0, valores_selecionados[1])
-            descricao_produto_edicao.insert(0, valores_selecionados[2])
-            preco_produto_edicao.insert(0, valores_selecionados[3])
+            #preenche os campos com os dados atuais (None vira texto vazio)
+            nome_produto_edicao.insert(0, "" if produto[0] is None else produto[0])
+            descricao_produto_edicao.insert(0, "" if produto[1] is None else produto[1])
+            preco_produto_edicao.insert(0, "" if produto[2] is None else produto[2])
 
             def salvar_edicao():
 
@@ -248,7 +262,7 @@ def verifica_credencial():
 
                 #alteração dos dados
                 cursor.execute("UPDATE Produtos SET Nome = ?, Descricao = ?, Preco = ? WHERE ID = ?",
-                               (novo_nome, nova_descricao, novo_preco, valores_selecionados[0]))
+                               (novo_nome, nova_descricao, novo_preco, id_produto))
                 #salvar
                 conexao.commit()
                 #listagem e atualização na treeview
@@ -257,12 +271,13 @@ def verifica_credencial():
                 janela_edicao.destroy()
 
             def deletar_registro():
-                #id do registro
-                selected_item = treeview.selection()[0]
-
-                id_selecionado = treeview.item(selected_item)['values'][0]
-                #comando para deletar
-                cursor.execute("DELETE FROM Produtos WHERE ID = ?", (id_selecionado,))
+                #confirmação antes de apagar
+                if not messagebox.askyesno("Confirmar exclusão",
+                                           f"Deseja realmente excluir o produto '{produto[0]}'?",
+                                           parent=janela_edicao):
+                    return
+                #apaga o produto desta janela (id_produto), não a linha selecionada no momento
+                cursor.execute("DELETE FROM Produtos WHERE ID = ?", (id_produto,))
 
                 conexao.commit()
 
@@ -306,9 +321,18 @@ def verifica_credencial():
 
         def deletar():
 
-            #id do registro
-            selected_item = treeview.selection()[0]
-            id_selecionado = treeview.item(selected_item)['values'][0]
+            #nada selecionado: avisa em vez de dar erro
+            selecao = treeview.selection()
+            if not selecao:
+                messagebox.showwarning("Deletar", "Selecione um produto na tabela para deletar.", parent=janela)
+                return
+            valores = treeview.item(selecao[0])['values']
+            id_selecionado = valores[0]
+            #confirmação antes de apagar
+            if not messagebox.askyesno("Confirmar exclusão",
+                                       f"Deseja realmente excluir o produto '{valores[1]}'?",
+                                       parent=janela):
+                return
             #comando para deletar
             cursor.execute("DELETE FROM Produtos WHERE ID = ?", (id_selecionado,))
             conexao.commit()
@@ -330,7 +354,7 @@ def verifica_credencial():
         menu_arquivo = Menu(menu_barra, tearoff = 0)
         menu_barra.add_cascade(label = "Arquivo", menu = menu_arquivo)
         #opção cadastrar
-        menu_arquivo.add_command(label= "Cadastrar", command = janela.destroy)
+        menu_arquivo.add_command(label= "Cadastrar", command = cadastrar)
         #opção sair
         menu_arquivo.add_command(label = "Sair", command = janela.destroy)
         #inicia janela
