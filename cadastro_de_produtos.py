@@ -3,6 +3,20 @@ import pyodbc
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
+import math
+
+def converter_preco(texto):
+    #converte o texto digitado em número; devolve None se for inválido
+    #aceita vírgula ou ponto como separador decimal e o prefixo "R$" (ex.: "R$ 10,50")
+    texto = texto.strip().replace("R$", "").replace(" ", "").replace(",", ".")
+    try:
+        preco = float(texto)
+    except ValueError:
+        return None
+    #recusa "nan"/"inf" (o float() os aceita) e valores negativos
+    if not math.isfinite(preco) or preco < 0:
+        return None
+    return round(preco, 2)
 
 #----------------------------------------------------------------------------#
 # PALETA DE CORES DA APLICAÇÃO
@@ -130,8 +144,15 @@ def verifica_credencial():
 
             def salvar_dados():
 
+                #valida o preço antes de gravar
+                preco = converter_preco(preco_produto_cadastrar.get())
+                if preco is None:
+                    messagebox.showwarning("Preço inválido", "Digite um preço válido, por exemplo: 10,50", parent=janela_cadastrar)
+                    preco_produto_cadastrar.focus_set()
+                    return
+
                 #tupla valores
-                novo_produto_cadastrar = (nome_produto_cadastrar.get(), descricao_produto_cadastrar.get(), preco_produto_cadastrar.get())
+                novo_produto_cadastrar = (nome_produto_cadastrar.get(), descricao_produto_cadastrar.get(), preco)
                 #inserção dos valores
                 cursor.execute("INSERT INTO Produtos (Nome, Descricao, Preco) VALUES (?, ?, ?)", novo_produto_cadastrar)
                 #salvar
@@ -258,7 +279,12 @@ def verifica_credencial():
 
                 novo_nome = nome_produto_edicao.get()
                 nova_descricao = descricao_produto_edicao.get()
-                novo_preco = preco_produto_edicao.get()
+                #valida o preço antes de gravar
+                novo_preco = converter_preco(preco_produto_edicao.get())
+                if novo_preco is None:
+                    messagebox.showwarning("Preço inválido", "Digite um preço válido, por exemplo: 10,50", parent=janela_edicao)
+                    preco_produto_edicao.focus_set()
+                    return
 
                 #alteração dos dados
                 cursor.execute("UPDATE Produtos SET Nome = ?, Descricao = ?, Preco = ? WHERE ID = ?",

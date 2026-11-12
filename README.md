@@ -55,7 +55,7 @@ Entre com um usuário cadastrado na tabela `Usuarios`. A tela de produtos abre e
 ## Observações
 
 - Projeto de estudo: as senhas são salvas e comparadas em texto puro, sem criptografia. Não use em produção.
-- O preço ainda não é validado (aceita qualquer texto).
+- ~~O preço ainda não é validado (aceita qualquer texto).~~ **(Corrigido)**: o preço agora aceita só números não negativos, com vírgula ou ponto (ex.: `10,50`).
 
 ## Tecnologias
 
